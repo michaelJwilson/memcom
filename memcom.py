@@ -1,6 +1,7 @@
 import numpy as np
+import pandas as pd
 
-from   astropy.table import Table
+from   astropy.table import Table, join, vstack, hstack
 
 def fetch_name(name):
     # E.g. Abareshi,&nbsp;Behzad
@@ -40,11 +41,13 @@ def bounce_sponsor(mems, bounces, email=True):
 # ('Name', 'Username', 'Email', 'Builder', 'Institution', 'Position', 'Membership', 'Sponsor', 'Role', 'Capabilities', 'Action Needed?')
 mems = Table.read('DESIUsers.csv')
 
-
 for name in ['Sponsor' , 'Name']:
     mems['Sponsor'] = fetch_names(mems['Sponsor'].data, existing=False)
-    mems['Name'] = fetch_names(mems['Name'].data, existing=False)
+    mems['Name'] = fetch_names(mems['Name'].data, existing= False)
 
+# join(mems, bounces, key='Username', join_type='left')
+
+    
 sponsors = mems[np.isin(mems['Name'].data, mems['Sponsor'].data)]['Name', 'Email']
 
 mems['Sponsor Email'] = [mems['Email'].data[mems['Name'].data == x] for x in mems['Sponsor'].data]
@@ -54,7 +57,7 @@ mems['Sponsor Email'] = [x[0] if x else '' for x in mems['Sponsor Email'].data]
 
 mems = mems['Name', 'Sponsor', 'Email', 'Sponsor Email', 'Role', 'Capabilities']
 mems.pprint()
-
+mems.write('DESIUsers_sponemail.csv', format='csv', overwrite=True)
 
 bounces = ['Ahlen, Steve', 'Abolfathi, Bela', 'Aldering, Greg', 'Alam, Shadab', 'Addison, Graeme', 'Zou, Jiaqi']
 
